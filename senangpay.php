@@ -88,4 +88,26 @@ class my_senangpay_payment_senangpay extends CRM_Core_Payment
         
         exit();
     }
+    
+    public function handlePaymentNotification()
+    {
+        require_once 'CRM/Utils/Array.php';
+        $module = CRM_Utils_Array::value('module', $_GET);
+
+        # Attempt to determine component type ... Will add processing of notification, for now just redirect to thank you page
+        switch ($module)
+        {
+            case 'contribute':
+                $finalURL = CRM_Utils_System::url('civicrm/event/register', "_qf_ThankYou_display=1&qfKey={$_GET['qfKey']}", false, null, false);
+                break;
+            case 'event':
+                $finalURL = CRM_Utils_System::url('civicrm/contribute/transact', "_qf_ThankYou_display=1&qfKey={$_GET['qfKey']}", false, null, false);
+                break;
+            default:
+                require_once 'CRM/Core/Error.php';
+                CRM_Core_Error::debug_log_message("Could not get module name from request url");
+                echo "Could not get module name from request url\r\n";
+        }
+        CRM_Utils_System::redirect($finalURL);
+    }
 }
